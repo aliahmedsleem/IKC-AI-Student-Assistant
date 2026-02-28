@@ -1,14 +1,11 @@
 # admin_routes.py
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for
 import sqlite3
 from datetime import datetime
 
-from config_utils import get_alpha, set_alpha
-
 DB_PATH = "faqs.db"
-
 admin_bp = Blueprint("admin", __name__, template_folder="templates")
 
 
@@ -26,30 +23,27 @@ def admin_dashboard():
     faqs = c.fetchall()
 
     # unanswered / low-confidence
-    c.execute(
-        """
+    c.execute("""
         SELECT rowid, timestamp, user_message, confidence
         FROM conversations
-        WHERE matched_faq_id IS NULL OR confidence < 0.4
+        WHERE matched_faq_id IS NULL OR confidence IS NULL OR confidence > 0.45
         ORDER BY timestamp DESC
-        LIMIT 150
-        """
-    )
+        LIMIT 200
+    """)
     unanswered = c.fetchall()
 
     conn.close()
-
-    alpha = get_alpha()
-    mode = "High-Precision" if alpha >= 0.7 else "High-Recall"
-
-    return render_template("admin.html", faqs=faqs, unanswered=unanswered, current_mode=mode)
+    return render_template("admin.html", faqs=faqs, unanswered=unanswered)
 
 
 @admin_bp.route("/admin/add", methods=["POST"])
 def add_faq():
-    question = request.form["question"].strip()
-    answer = request.form["answer"].strip()
-    category = request.form.get("category", "general").strip() or "general"
+    question = (request.form.get("question") or "").strip()
+    answer = (request.form.get("answer") or "").strip()
+    category = (request.form.get("category") or "general").strip() or "general"
+
+    if not question or not answer:
+        return redirect(url_for("admin.admin_dashboard"))
 
     conn = get_conn()
     c = conn.cursor()
@@ -57,6 +51,14 @@ def add_faq():
         "INSERT INTO faqs (question, answer, category, created_at) VALUES (?,?,?,?)",
         (question, answer, category, datetime.utcnow().isoformat()),
     )
+
+    # (اختياري) تنظيف unanswered اللي نفس نص السؤال بالضبط
+    c.execute("""
+        DELETE FROM conversations
+        WHERE user_message = ?
+          AND (matched_faq_id IS NULL OR confidence IS NULL OR confidence > 0.45)
+    """, (question,))
+
     conn.commit()
     conn.close()
     return redirect(url_for("admin.admin_dashboard"))
@@ -64,9 +66,9 @@ def add_faq():
 
 @admin_bp.route("/admin/edit/<int:faq_id>", methods=["POST"])
 def edit_faq(faq_id):
-    question = request.form["question"].strip()
-    answer = request.form["answer"].strip()
-    category = request.form.get("category", "general").strip() or "general"
+    question = (request.form.get("question") or "").strip()
+    answer = (request.form.get("answer") or "").strip()
+    category = (request.form.get("category") or "general").strip() or "general"
 
     conn = get_conn()
     c = conn.cursor()
@@ -89,16 +91,15 @@ def delete_faq(faq_id):
     return redirect(url_for("admin.admin_dashboard"))
 
 
-@admin_bp.route("/admin/mode/toggle", methods=["POST"])
-def toggle_mode():
-    a = get_alpha()
-    new_a = 0.5 if a >= 0.7 else 0.7
-    set_alpha(new_a)
+@admin_bp.route("/admin/unanswered/clear", methods=["POST"])
+def clear_unanswered():
+    """تصفير/مسح الأسئلة غير المجابة أو منخفضة الجودة من جدول conversations."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("""
+        DELETE FROM conversations
+        WHERE matched_faq_id IS NULL OR confidence IS NULL OR confidence > 0.45
+    """)
+    conn.commit()
+    conn.close()
     return redirect(url_for("admin.admin_dashboard"))
-
-
-@admin_bp.route("/admin/mode", methods=["GET"])
-def get_mode():
-    a = get_alpha()
-    mode = "high" if a >= 0.7 else "normal"
-    return jsonify({"alpha": a, "mode": mode})

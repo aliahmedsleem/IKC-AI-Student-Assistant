@@ -4,169 +4,194 @@
   <meta charset="UTF-8" />
   <title>لوحة التحكم - نظام FAQ الجامعي</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
   <style>
-    body {
-      background-color: #f8fafc;
-      font-family: 'Tajawal', sans-serif;
+    body{ background:#f8fafc; font-family: 'Tajawal', sans-serif; }
+    .navbar{ background:#1e3a8a; }
+    .navbar-brand{ color:#fff !important; font-weight:800; }
+
+    .card{ border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.06); border:0; }
+    .card-header{ border-top-left-radius:16px; border-top-right-radius:16px; font-weight:800; }
+
+    .form-control, .btn{ border-radius:12px; }
+    textarea.form-control{ min-height:110px; resize:vertical; }
+
+    .table thead{ background:#e2e8f0; font-weight:800; }
+    .table td{ vertical-align:top; }
+
+    /* Responsive: خلي الجداول قابلة للتمرير */
+    .table-responsive{ border-radius:12px; }
+
+    /* موبايل: خفف النص وخلّي الأزرار تاخذ سطر */
+    @media (max-width: 576px){
+      .navbar-brand{ font-size:0.95rem; }
+      .btn{ width:100%; }
+      .actions-wrap{ display:grid; gap:8px; }
     }
-    .navbar {
-      background-color: #1e3a8a;
-    }
-    .navbar-brand {
-      color: white !important;
-      font-weight: bold;
-    }
-    .mode-btn {
-      background: #facc15;
-      color: #1e293b;
-      border: none;
-      font-weight: bold;
-    }
-    .card {
-      border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    .table thead {
-      background: #e2e8f0;
-      font-weight: bold;
-    }
-    .form-control, .btn {
-      border-radius: 10px;
-    }
-    .footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #64748b;
-    }
+
+    .footer{ margin-top:30px; text-align:center; font-size:.85rem; color:#64748b; }
+    .badge-soft{ background:#eef2ff; color:#3730a3; }
   </style>
 </head>
+
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="#">📘 لوحة التحكم - نظام FAQ الجامعي</a>
-    <div class="d-flex">
-      <form action="/admin/mode/toggle" method="POST" class="m-0">
-        <button type="submit" class="btn mode-btn">
-          تبديل النمط: {{ current_mode }}
-        </button>
+    <div class="d-flex gap-2">
+      <form action="/admin/unanswered/clear" method="POST" class="m-0"
+            onsubmit="return confirm('هل تريد تصفير/مسح قائمة الأسئلة غير المجابة؟');">
+        <button type="submit" class="btn btn-warning btn-sm fw-bold">🧹 تصفير غير المُجاب</button>
       </form>
     </div>
   </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container my-4">
 
-  <!-- قسم إضافة سؤال جديد -->
+  <!-- إضافة سؤال جديد -->
   <div class="card mb-4">
     <div class="card-header bg-primary text-white">➕ إضافة سؤال جديد</div>
     <div class="card-body">
       <form action="/admin/add" method="POST" class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">السؤال</label>
-          <input type="text" name="question" class="form-control" required>
+        <div class="col-12">
+          <label class="form-label fw-bold">السؤال</label>
+          <input type="text" name="question" class="form-control" required placeholder="اكتب السؤال هنا">
         </div>
-        <div class="col-md-6">
-          <label class="form-label">الإجابة</label>
-          <input type="text" name="answer" class="form-control" required>
+
+        <div class="col-12">
+          <label class="form-label fw-bold">الإجابة</label>
+          <textarea name="answer" class="form-control" required placeholder="اكتب الإجابة هنا"></textarea>
         </div>
-        <div class="col-md-4">
-          <label class="form-label">الفئة</label>
-          <input type="text" name="category" class="form-control" placeholder="مثلاً: التسجيل">
+
+        <div class="col-12 col-md-4">
+          <label class="form-label fw-bold">الفئة</label>
+          <input type="text" name="category" class="form-control" placeholder="مثلاً: التسجيل" value="general">
         </div>
-        <div class="col-md-12 text-end">
-          <button type="submit" class="btn btn-success">💾 حفظ</button>
+
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-success fw-bold px-4">💾 حفظ</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- قائمة الأسئلة المسجلة -->
+  <!-- الأسئلة المسجلة -->
   <div class="card mb-4">
     <div class="card-header bg-secondary text-white">📄 الأسئلة المسجلة</div>
-    <div class="card-body table-responsive">
-      <table class="table table-striped align-middle">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>السؤال</th>
-            <th>الإجابة</th>
-            <th>الفئة</th>
-            <th>تعديل / حذف</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for faq in faqs %}
-          <tr>
-            <td>{{ faq[0] }}</td>
-            <td>{{ faq[1] }}</td>
-            <td>{{ faq[2] }}</td>
-            <td>{{ faq[3] }}</td>
-            <td>
-              <!-- تعديل -->
-              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#edit{{ faq[0] }}">✏️</button>
+    <div class="card-body">
+      {% if faqs and faqs|length > 0 %}
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="width:70px">ID</th>
+              <th style="min-width:260px">السؤال</th>
+              <th style="min-width:320px">الإجابة</th>
+              <th style="min-width:140px">الفئة</th>
+              <th style="width:180px">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for faq in faqs %}
+            <tr>
+              <td><span class="badge bg-dark">{{ faq[0] }}</span></td>
 
-              <!-- حذف -->
-              <form action="/admin/delete/{{ faq[0] }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('هل تريد حذف هذا السؤال؟')">🗑</button>
-              </form>
-            </td>
-          </tr>
-          <!-- نموذج التعديل -->
-          <tr class="collapse" id="edit{{ faq[0] }}">
-            <td colspan="5">
-              <form action="/admin/edit/{{ faq[0] }}" method="POST" class="row g-2">
-                <div class="col-md-5">
-                  <input type="text" name="question" class="form-control" value="{{ faq[1] }}">
+              <td>
+                <div class="small text-muted mb-1">Question</div>
+                <div>{{ faq[1] }}</div>
+              </td>
+
+              <td>
+                <div class="small text-muted mb-1">Answer</div>
+                <div style="white-space:pre-wrap">{{ faq[2] }}</div>
+              </td>
+
+              <td><span class="badge badge-soft">{{ faq[3] or 'general' }}</span></td>
+
+              <td class="text-nowrap">
+                <div class="actions-wrap">
+                  <button class="btn btn-sm btn-outline-primary"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#edit{{ faq[0] }}">✏️ تعديل</button>
+
+                  <form action="/admin/delete/{{ faq[0] }}" method="POST" class="m-0"
+                        onsubmit="return confirm('هل تريد حذف هذا السؤال؟');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">🗑 حذف</button>
+                  </form>
                 </div>
-                <div class="col-md-5">
-                  <input type="text" name="answer" class="form-control" value="{{ faq[2] }}">
+              </td>
+            </tr>
+
+            <!-- نموذج التعديل -->
+            <tr class="collapse" id="edit{{ faq[0] }}">
+              <td colspan="5">
+                <div class="p-3 border rounded-3 bg-light">
+                  <form action="/admin/edit/{{ faq[0] }}" method="POST" class="row g-2">
+                    <div class="col-12 col-lg-4">
+                      <label class="form-label fw-bold">السؤال</label>
+                      <textarea name="question" class="form-control" rows="3">{{ faq[1] }}</textarea>
+                    </div>
+                    <div class="col-12 col-lg-5">
+                      <label class="form-label fw-bold">الإجابة</label>
+                      <textarea name="answer" class="form-control" rows="3">{{ faq[2] }}</textarea>
+                    </div>
+                    <div class="col-12 col-lg-3">
+                      <label class="form-label fw-bold">الفئة</label>
+                      <input type="text" name="category" class="form-control" value="{{ faq[3] or 'general' }}">
+                      <div class="mt-2 text-end">
+                        <button type="submit" class="btn btn-primary btn-sm fw-bold">💾 تحديث</button>
+                      </div>
+                    </div>
+                  </form>
                 </div>
-                <div class="col-md-2">
-                  <input type="text" name="category" class="form-control" value="{{ faq[3] }}">
-                </div>
-                <div class="col-md-12 text-end">
-                  <button type="submit" class="btn btn-primary btn-sm">💾 تحديث</button>
-                </div>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-muted mb-0">لا توجد أسئلة بعد. أضف سؤالًا من النموذج أعلاه.</p>
+      {% endif %}
     </div>
   </div>
 
-  <!-- الأسئلة غير المجابة -->
+  <!-- غير المُجاب / منخفضة الجودة -->
   <div class="card mb-4">
-    <div class="card-header bg-warning">⚠️ الأسئلة غير المجابة أو منخفضة الثقة</div>
-    <div class="card-body table-responsive">
-      {% if unanswered %}
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>التاريخ</th>
-            <th>السؤال</th>
-            <th>الثقة</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for u in unanswered %}
-          <tr>
-            <td>{{ u[1] }}</td>
-            <td>{{ u[2] }}</td>
-            <td>{{ "%.2f"|format(u[3]) }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="card-header bg-warning">⚠️ الأسئلة غير المُجاب عنها / منخفضة الجودة</div>
+    <div class="card-body">
+      {% if unanswered and unanswered|length > 0 %}
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="min-width:170px">التاريخ</th>
+              <th>السؤال</th>
+              <th style="min-width:120px">المؤشر</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in unanswered %}
+            <tr>
+              <td class="small">{{ u[1] }}</td>
+              <td style="white-space:pre-wrap">{{ u[2] }}</td>
+              <td>
+                {% if u[3] is none %}
+                  <span class="badge bg-secondary">None</span>
+                {% else %}
+                  <span class="badge bg-dark">{{ "%.2f"|format(u[3]) }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
       {% else %}
-      <p class="text-muted">لا توجد أسئلة غير مجابة حاليًا 🎉</p>
+        <p class="text-muted mb-0">لا توجد أسئلة غير مجابة حاليًا 🎉</p>
       {% endif %}
     </div>
   </div>
@@ -174,7 +199,7 @@
 </div>
 
 <div class="footer">
-  <p>© 2025 نظام FAQ الجامعي – كلية الإمام الكاظم (ع)</p>
+  <p>© 2026 نظام FAQ الجامعي</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
