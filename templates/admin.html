@@ -4,204 +4,837 @@
   <meta charset="UTF-8" />
   <title>لوحة التحكم - نظام FAQ الجامعي</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="{{ url_for('static', filename='css/bootstrap.rtl.min.css') }}" rel="stylesheet"/>
 
   <style>
-    body{ background:#f8fafc; font-family: 'Tajawal', sans-serif; }
-    .navbar{ background:#1e3a8a; }
-    .navbar-brand{ color:#fff !important; font-weight:800; }
-
-    .card{ border-radius:16px; box-shadow:0 4px 14px rgba(0,0,0,.06); border:0; }
-    .card-header{ border-top-left-radius:16px; border-top-right-radius:16px; font-weight:800; }
-
-    .form-control, .btn{ border-radius:12px; }
-    textarea.form-control{ min-height:110px; resize:vertical; }
-
-    .table thead{ background:#e2e8f0; font-weight:800; }
-    .table td{ vertical-align:top; }
-
-    /* Responsive: خلي الجداول قابلة للتمرير */
-    .table-responsive{ border-radius:12px; }
-
-    /* موبايل: خفف النص وخلّي الأزرار تاخذ سطر */
-    @media (max-width: 576px){
-      .navbar-brand{ font-size:0.95rem; }
-      .btn{ width:100%; }
-      .actions-wrap{ display:grid; gap:8px; }
+    :root{
+      --sidebar-bg:#0f172a;
+      --sidebar-hover:#1e293b;
+      --sidebar-active:#2563eb;
+      --page-bg:#f8fafc;
+      --card-bg:#ffffff;
+      --muted:#64748b;
+      --border:#e2e8f0;
+      --shadow:0 8px 24px rgba(15,23,42,.08);
+      --radius:18px;
     }
 
-    .footer{ margin-top:30px; text-align:center; font-size:.85rem; color:#64748b; }
-    .badge-soft{ background:#eef2ff; color:#3730a3; }
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      background:var(--page-bg);
+      font-family:'Tajawal', sans-serif;
+      color:#0f172a;
+    }
+
+    .admin-shell{
+      display:flex;
+      min-height:100vh;
+    }
+
+    .sidebar{
+      width:270px;
+      background:var(--sidebar-bg);
+      color:#fff;
+      padding:22px 18px;
+      position:fixed;
+      top:0;
+      right:0;
+      bottom:0;
+      overflow-y:auto;
+      z-index:1000;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:26px;
+      padding-bottom:16px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .brand-icon{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,#2563eb,#1d4ed8);
+      font-size:1.2rem;
+      box-shadow:0 10px 20px rgba(37,99,235,.25);
+    }
+
+    .brand h1{
+      font-size:1.05rem;
+      line-height:1.4;
+      margin:0;
+      font-weight:800;
+    }
+
+    .brand small{
+      display:block;
+      color:#cbd5e1;
+      font-size:.78rem;
+      margin-top:2px;
+    }
+
+    .sidebar-section-title{
+      font-size:.78rem;
+      color:#94a3b8;
+      margin:18px 8px 10px;
+      font-weight:700;
+    }
+
+    .nav-link-custom{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#e2e8f0;
+      text-decoration:none;
+      padding:12px 14px;
+      border-radius:14px;
+      margin-bottom:8px;
+      transition:.2s ease;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .nav-link-custom:hover{
+      background:var(--sidebar-hover);
+      color:#fff;
+    }
+
+    .nav-link-custom.active{
+      background:var(--sidebar-active);
+      color:#fff;
+      box-shadow:0 8px 18px rgba(37,99,235,.30);
+    }
+
+    .sidebar-card{
+      margin-top:24px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .sidebar-card .status{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      background:rgba(34,197,94,.12);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,.20);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.8rem;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#22c55e;
+      display:inline-block;
+    }
+
+    .sidebar-card p{
+      margin:0;
+      color:#cbd5e1;
+      font-size:.82rem;
+      line-height:1.6;
+    }
+
+    .main{
+      flex:1;
+      margin-right:270px;
+      padding:24px;
+    }
+
+    .topbar{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:18px 20px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .topbar-title{
+      margin:0;
+      font-size:1.25rem;
+      font-weight:900;
+      color:#0f172a;
+    }
+
+    .topbar-sub{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+
+    .card-clean{
+      background:var(--card-bg);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-clean + .card-clean{
+      margin-top:20px;
+    }
+
+    .card-head{
+      padding:16px 18px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      background:#fff;
+    }
+
+    .card-head h3{
+      margin:0;
+      font-size:1rem;
+      font-weight:900;
+    }
+
+    .card-body-clean{
+      padding:18px;
+    }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:16px;
+      margin-bottom:20px;
+    }
+
+    .stat-box{
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:.85rem;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .stat-number{
+      font-size:1.7rem;
+      font-weight:900;
+      color:#0f172a;
+    }
+
+    .form-control, .btn, .form-select{
+      border-radius:14px;
+    }
+
+    textarea.form-control{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .table thead th{
+      background:#f1f5f9;
+      border-bottom:1px solid var(--border);
+      font-weight:900;
+      color:#334155;
+      white-space:nowrap;
+    }
+
+    .table td{
+      vertical-align:top;
+    }
+
+    .table-responsive{
+      border-radius:16px;
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+
+    .badge-soft{
+      background:#eff6ff;
+      color:#1d4ed8;
+      border:1px solid #bfdbfe;
+      border-radius:999px;
+      padding:7px 10px;
+      font-weight:800;
+    }
+
+    .section-pane{
+      display:none;
+    }
+
+    .section-pane.active{
+      display:block;
+    }
+
+    .actions-wrap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .small-muted{
+      font-size:.8rem;
+      color:var(--muted);
+    }
+
+    .empty-box{
+      padding:24px;
+      border:1px dashed #cbd5e1;
+      border-radius:16px;
+      color:#64748b;
+      text-align:center;
+      background:#fff;
+    }
+
+    .footer{
+      margin-top:26px;
+      text-align:center;
+      color:#64748b;
+      font-size:.85rem;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .toolbar form{
+      margin:0;
+    }
+
+    .inline-form{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .inline-form .form-control{
+      min-width:220px;
+    }
+
+    .mobile-toggle{
+      display:none;
+    }
+
+    @media (max-width: 991px){
+      .sidebar{
+        transform:translateX(100%);
+        transition:.25s ease;
+      }
+
+      .sidebar.open{
+        transform:translateX(0);
+      }
+
+      .main{
+        margin-right:0;
+        padding:16px;
+      }
+
+      .mobile-toggle{
+        display:inline-flex;
+      }
+
+      .stats-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 576px){
+      .stats-grid{
+        grid-template-columns:1fr;
+      }
+
+      .topbar{
+        padding:14px;
+      }
+
+      .card-body-clean{
+        padding:14px;
+      }
+
+      .actions-wrap{
+        display:grid;
+        gap:8px;
+      }
+
+      .actions-wrap .btn{
+        width:100%;
+      }
+
+      .inline-form{
+        display:grid;
+      }
+
+      .inline-form .form-control,
+      .inline-form .btn{
+        width:100%;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">📘 لوحة التحكم - نظام FAQ الجامعي</a>
-    <div class="d-flex gap-2">
-      <form action="/admin/unanswered/clear" method="POST" class="m-0"
-            onsubmit="return confirm('هل تريد تصفير/مسح قائمة الأسئلة غير المجابة؟');">
-        <button type="submit" class="btn btn-warning btn-sm fw-bold">🧹 تصفير غير المُجاب</button>
-      </form>
-    </div>
-  </div>
-</nav>
+<div class="admin-shell">
 
-<div class="container my-4">
-
-  <!-- إضافة سؤال جديد -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">➕ إضافة سؤال جديد</div>
-    <div class="card-body">
-      <form action="/admin/add" method="POST" class="row g-3">
-        <div class="col-12">
-          <label class="form-label fw-bold">السؤال</label>
-          <input type="text" name="question" class="form-control" required placeholder="اكتب السؤال هنا">
-        </div>
-
-        <div class="col-12">
-          <label class="form-label fw-bold">الإجابة</label>
-          <textarea name="answer" class="form-control" required placeholder="اكتب الإجابة هنا"></textarea>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <label class="form-label fw-bold">الفئة</label>
-          <input type="text" name="category" class="form-control" placeholder="مثلاً: التسجيل" value="general">
-        </div>
-
-        <div class="col-12 text-end">
-          <button type="submit" class="btn btn-success fw-bold px-4">💾 حفظ</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- الأسئلة المسجلة -->
-  <div class="card mb-4">
-    <div class="card-header bg-secondary text-white">📄 الأسئلة المسجلة</div>
-    <div class="card-body">
-      {% if faqs and faqs|length > 0 %}
-      <div class="table-responsive">
-        <table class="table table-striped align-middle mb-0">
-          <thead>
-            <tr>
-              <th style="width:70px">ID</th>
-              <th style="min-width:260px">السؤال</th>
-              <th style="min-width:320px">الإجابة</th>
-              <th style="min-width:140px">الفئة</th>
-              <th style="width:180px">إجراءات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for faq in faqs %}
-            <tr>
-              <td><span class="badge bg-dark">{{ faq[0] }}</span></td>
-
-              <td>
-                <div class="small text-muted mb-1">Question</div>
-                <div>{{ faq[1] }}</div>
-              </td>
-
-              <td>
-                <div class="small text-muted mb-1">Answer</div>
-                <div style="white-space:pre-wrap">{{ faq[2] }}</div>
-              </td>
-
-              <td><span class="badge badge-soft">{{ faq[3] or 'general' }}</span></td>
-
-              <td class="text-nowrap">
-                <div class="actions-wrap">
-                  <button class="btn btn-sm btn-outline-primary"
-                          data-bs-toggle="collapse"
-                          data-bs-target="#edit{{ faq[0] }}">✏️ تعديل</button>
-
-                  <form action="/admin/delete/{{ faq[0] }}" method="POST" class="m-0"
-                        onsubmit="return confirm('هل تريد حذف هذا السؤال؟');">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">🗑 حذف</button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-
-            <!-- نموذج التعديل -->
-            <tr class="collapse" id="edit{{ faq[0] }}">
-              <td colspan="5">
-                <div class="p-3 border rounded-3 bg-light">
-                  <form action="/admin/edit/{{ faq[0] }}" method="POST" class="row g-2">
-                    <div class="col-12 col-lg-4">
-                      <label class="form-label fw-bold">السؤال</label>
-                      <textarea name="question" class="form-control" rows="3">{{ faq[1] }}</textarea>
-                    </div>
-                    <div class="col-12 col-lg-5">
-                      <label class="form-label fw-bold">الإجابة</label>
-                      <textarea name="answer" class="form-control" rows="3">{{ faq[2] }}</textarea>
-                    </div>
-                    <div class="col-12 col-lg-3">
-                      <label class="form-label fw-bold">الفئة</label>
-                      <input type="text" name="category" class="form-control" value="{{ faq[3] or 'general' }}">
-                      <div class="mt-2 text-end">
-                        <button type="submit" class="btn btn-primary btn-sm fw-bold">💾 تحديث</button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🤖</div>
+      <div>
+        <h1>لوحة تحكم النظام</h1>
+        <small>University FAQ Admin Panel</small>
       </div>
-      {% else %}
-        <p class="text-muted mb-0">لا توجد أسئلة بعد. أضف سؤالًا من النموذج أعلاه.</p>
-      {% endif %}
     </div>
-  </div>
 
-  <!-- غير المُجاب / منخفضة الجودة -->
-  <div class="card mb-4">
-    <div class="card-header bg-warning">⚠️ الأسئلة غير المُجاب عنها / منخفضة الجودة</div>
-    <div class="card-body">
-      {% if unanswered and unanswered|length > 0 %}
-      <div class="table-responsive">
-        <table class="table table-bordered align-middle mb-0">
-          <thead class="table-light">
-            <tr>
-              <th style="min-width:170px">التاريخ</th>
-              <th>السؤال</th>
-              <th style="min-width:120px">المؤشر</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for u in unanswered %}
-            <tr>
-              <td class="small">{{ u[1] }}</td>
-              <td style="white-space:pre-wrap">{{ u[2] }}</td>
-              <td>
-                {% if u[3] is none %}
-                  <span class="badge bg-secondary">None</span>
-                {% else %}
-                  <span class="badge bg-dark">{{ "%.2f"|format(u[3]) }}</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    <div class="sidebar-section-title">التنقل</div>
+
+    <a class="nav-link-custom active" data-target="dashboard-section">
+      <span>📊</span>
+      <span>لوحة المعلومات</span>
+    </a>
+
+    <a class="nav-link-custom" data-target="add-section">
+      <span>➕</span>
+      <span>إضافة سؤال</span>
+    </a>
+
+    <a class="nav-link-custom" data-target="faq-section">
+      <span>📘</span>
+      <span>إدارة الأسئلة</span>
+    </a>
+
+    <a class="nav-link-custom" data-target="unanswered-section">
+      <span>⚠️</span>
+      <span>غير المُجاب</span>
+    </a>
+
+    <a class="nav-link-custom" data-target="system-section">
+      <span>⚙️</span>
+      <span>إدارة النظام</span>
+    </a>
+
+    <div class="sidebar-card">
+      <div class="status">
+        <span class="dot"></span>
+        <span>النظام فعّال</span>
       </div>
-      {% else %}
-        <p class="text-muted mb-0">لا توجد أسئلة غير مجابة حاليًا 🎉</p>
-      {% endif %}
+      <p>
+        من هنا تكدر تدير الأسئلة، تراجع المحادثات غير المجابة، وتحدّث قاعدة المعرفة بشكل منظم.
+      </p>
     </div>
-  </div>
+  </aside>
 
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <button class="btn btn-outline-primary mobile-toggle" id="sidebarToggle">☰ القائمة</button>
+        <h2 class="topbar-title">لوحة التحكم - نظام FAQ الجامعي</h2>
+        <p class="topbar-sub">إدارة قاعدة الأسئلة، متابعة الأداء، وتنظيم التحديثات</p>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <section id="dashboard-section" class="section-pane active">
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">عدد الأسئلة المسجلة</div>
+          <div class="stat-number">{{ total_faqs if total_faqs is defined else (faqs|length if faqs else 0) }}</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">الأسئلة غير المُجابة</div>
+          <div class="stat-number">{{ total_unanswered if total_unanswered is defined else (unanswered|length if unanswered else 0) }}</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">الأسئلة المولدة لها Paraphrases</div>
+          <div class="stat-number">{{ total_with_paraphrases if total_with_paraphrases is defined else 0 }}</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">الأسئلة بدون Paraphrases</div>
+          <div class="stat-number">{{ total_without_paraphrases if total_without_paraphrases is defined else 0 }}</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">حالة النظام</div>
+          <div class="stat-number" style="font-size:1.2rem;color:#16a34a;">Active</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">نوع الإدارة</div>
+          <div class="stat-number" style="font-size:1.2rem;">Hybrid FAQ</div>
+        </div>
+      </div>
+
+      <div class="card-clean">
+        <div class="card-head">
+          <h3>📌 ملخص سريع</h3>
+        </div>
+        <div class="card-body-clean">
+          <div class="row g-3">
+            <div class="col-12 col-lg-6">
+              <div class="p-3 rounded-4 border bg-light h-100">
+                <h6 class="fw-bold">ما الذي تستطيع فعله من هذه اللوحة؟</h6>
+                <ul class="mb-0">
+                  <li>إضافة سؤال جديد مع إجابته.</li>
+                  <li>تعديل الأسئلة الموجودة أو حذفها.</li>
+                  <li>رفع أو تنزيل قاعدة الأسئلة من إدارة النظام.</li>
+                  <li>مراجعة الأسئلة غير المُجابة وتوسيع النظام.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <div class="p-3 rounded-4 border bg-light h-100">
+                <h6 class="fw-bold">أفضل ممارسة للتحديث</h6>
+                <ul class="mb-0">
+                  <li>أضف السؤال بصيغة واضحة ومباشرة.</li>
+                  <li>اكتب جوابًا ثابتًا ودقيقًا.</li>
+                  <li>استخدم الفلترة للعثور على الأسئلة المتكررة بسرعة.</li>
+                  <li>لا تضف معلومات متغيرة إلا بعد التحقق منها.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add -->
+    <section id="add-section" class="section-pane">
+      <div class="card-clean">
+        <div class="card-head">
+          <h3>➕ إضافة سؤال جديد</h3>
+        </div>
+        <div class="card-body-clean">
+          <form action="/admin/add" method="POST" class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-bold">السؤال</label>
+              <input type="text" name="question" class="form-control" required placeholder="اكتب السؤال هنا">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-bold">الإجابة</label>
+              <textarea name="answer" class="form-control" required placeholder="اكتب الإجابة هنا"></textarea>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-bold">الفئة</label>
+              <input type="text" name="category" class="form-control" placeholder="مثلاً: التسجيل" value="general">
+            </div>
+
+            <div class="col-12 col-md-8">
+              <label class="form-label fw-bold">Paraphrases (اختياري)</label>
+              <input type="text" name="paraphrase" class="form-control" placeholder="صياغات بديلة مفصولة بـ ||">
+            </div>
+
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-success fw-bold px-4">💾 حفظ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Management -->
+    <section id="faq-section" class="section-pane">
+      <div class="card-clean">
+        <div class="card-head">
+          <h3>📘 إدارة الأسئلة</h3>
+          <span class="small-muted">فلترة وتعديل الأسئلة المسجلة</span>
+        </div>
+
+        <div class="card-body-clean">
+          <form method="GET" action="/admin" class="inline-form mb-3">
+            <input type="hidden" name="section" value="faq-section">
+            <input type="text" name="faq_q" class="form-control" placeholder="فلترة الأسئلة حسب الكلمات..." value="{{ faq_q or '' }}">
+            <button type="submit" class="btn btn-primary fw-bold">🔍 بحث</button>
+            <a href="/admin?section=faq-section" class="btn btn-outline-secondary">إلغاء</a>
+          </form>
+
+          {% if faqs and faqs|length > 0 %}
+          <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width:70px">ID</th>
+                  <th style="min-width:220px">السؤال</th>
+                  <th style="min-width:280px">الإجابة</th>
+                  <th style="min-width:140px">الفئة</th>
+                  <th style="min-width:220px">Paraphrases</th>
+                  <th style="width:180px">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for faq in faqs %}
+                <tr>
+                  <td><span class="badge bg-dark">{{ faq[0] }}</span></td>
+
+                  <td>
+                    <div class="small-muted mb-1">Question</div>
+                    <div>{{ faq[1] }}</div>
+                  </td>
+
+                  <td>
+                    <div class="small-muted mb-1">Answer</div>
+                    <div style="white-space:pre-wrap">{{ faq[2] }}</div>
+                  </td>
+
+                  <td>
+                    <span class="badge-soft">{{ faq[3] or 'general' }}</span>
+                  </td>
+
+                  <td>
+                    <div style="white-space:pre-wrap">{{ faq[4] if faq|length > 4 else '' }}</div>
+                  </td>
+
+                  <td class="text-nowrap">
+                    <div class="actions-wrap">
+                      <button class="btn btn-sm btn-outline-primary"
+                              data-bs-toggle="collapse"
+                              data-bs-target="#edit{{ faq[0] }}">✏️ تعديل</button>
+
+                      <form action="/admin/delete/{{ faq[0] }}" method="POST" class="m-0"
+                            onsubmit="return confirm('هل تريد حذف هذا السؤال؟');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">🗑 حذف</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="collapse" id="edit{{ faq[0] }}">
+                  <td colspan="6">
+                    <div class="p-3 border rounded-4 bg-light">
+                      <form action="/admin/edit/{{ faq[0] }}" method="POST" class="row g-2">
+                        <div class="col-12 col-lg-3">
+                          <label class="form-label fw-bold">السؤال</label>
+                          <textarea name="question" class="form-control" rows="3">{{ faq[1] }}</textarea>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                          <label class="form-label fw-bold">الإجابة</label>
+                          <textarea name="answer" class="form-control" rows="3">{{ faq[2] }}</textarea>
+                        </div>
+
+                        <div class="col-12 col-lg-2">
+                          <label class="form-label fw-bold">الفئة</label>
+                          <input type="text" name="category" class="form-control" value="{{ faq[3] or 'general' }}">
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                          <label class="form-label fw-bold">Paraphrases</label>
+                          <textarea name="paraphrase" class="form-control" rows="3">{{ faq[4] if faq|length > 4 else '' }}</textarea>
+                          <div class="mt-2 text-end">
+                            <button type="submit" class="btn btn-primary btn-sm fw-bold">💾 تحديث</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <div class="empty-box">
+              لا توجد أسئلة تطابق الفلترة الحالية.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Unanswered -->
+    <section id="unanswered-section" class="section-pane">
+      <div class="card-clean">
+        <div class="card-head">
+          <h3>⚠️ الأسئلة غير المُجاب عنها / منخفضة الجودة</h3>
+
+          <div class="toolbar">
+            <form action="/admin/unanswered/clear" method="POST" class="m-0"
+                  onsubmit="return confirm('هل تريد تصفير/مسح قائمة الأسئلة غير المجابة؟');">
+              <button type="submit" class="btn btn-warning btn-sm fw-bold">🧹 تصفير غير المُجاب</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card-body-clean">
+          <form method="GET" action="/admin" class="inline-form mb-3">
+            <input type="hidden" name="section" value="unanswered-section">
+            <input type="text" name="unanswered_q" class="form-control" placeholder="فلترة غير المُجاب حسب الكلمات..." value="{{ unanswered_q or '' }}">
+            <button type="submit" class="btn btn-primary fw-bold">🔍 بحث</button>
+            <a href="/admin?section=unanswered-section" class="btn btn-outline-secondary">إلغاء</a>
+          </form>
+
+          {% if unanswered and unanswered|length > 0 %}
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="min-width:170px">التاريخ</th>
+                  <th>السؤال</th>
+                  <th style="min-width:120px">المؤشر</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in unanswered %}
+                <tr>
+                  <td class="small">{{ u[1] }}</td>
+                  <td style="white-space:pre-wrap">{{ u[2] }}</td>
+                  <td>
+                    {% if u[3] is none %}
+                      <span class="badge bg-secondary">None</span>
+                    {% else %}
+                      <span class="badge bg-dark">{{ "%.2f"|format(u[3]) }}</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+            <div class="empty-box">
+              لا توجد أسئلة غير مجابة حاليًا 🎉
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- System -->
+    <section id="system-section" class="section-pane">
+      <div class="row g-3">
+        <div class="col-12 col-lg-6">
+          <div class="card-clean h-100">
+            <div class="card-head">
+              <h3>⚙️ إدارة النظام</h3>
+            </div>
+            <div class="card-body-clean">
+              <div class="d-grid gap-2 mb-3">
+                <form action="/admin/system/generate-paraphrases" method="POST">
+                  <button type="submit" class="btn btn-outline-primary w-100">
+                    ⚡ توليد Paraphrases للأسئلة الناقصة
+                  </button>
+                </form>
+
+                <form action="/admin/system/rebuild-index" method="POST">
+                  <button type="submit" class="btn btn-outline-secondary w-100">
+                    🧠 إعادة فهرسة المعرفة
+                  </button>
+                </form>
+              </div>
+
+              <hr>
+
+              <div class="toolbar mb-3">
+                <form action="/admin/export/faqs" method="GET">
+                  <button type="submit" class="btn btn-outline-dark btn-sm fw-bold">⬇ تنزيل الأسئلة</button>
+                </form>
+              </div>
+
+              <form action="/admin/import/faqs" method="POST" enctype="multipart/form-data" class="inline-form">
+                <input type="file" name="file" class="form-control form-control-sm" accept=".csv,.json" required>
+                <button type="submit" class="btn btn-outline-success btn-sm fw-bold">⬆ رفع الأسئلة</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+          <div class="card-clean h-100">
+            <div class="card-head">
+              <h3>📌 ملاحظات الإدارة</h3>
+            </div>
+            <div class="card-body-clean">
+              <ul class="mb-0">
+                <li>ملف الرفع يدعم CSV أو JSON.</li>
+                <li>الأعمدة الأهم: question, answer, category, paraphrase.</li>
+                <li>استخدم الفلترة للعثور على الأسئلة المكررة أو المتشابهة.</li>
+                <li>حاول أن تكون الصياغات البديلة بنفس المعنى تمامًا.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <p>© 2026 نظام FAQ الجامعي</p>
+    </div>
+  </main>
 </div>
 
-<div class="footer">
-  <p>© 2026 نظام FAQ الجامعي</p>
-</div>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const navLinks = document.querySelectorAll('.nav-link-custom');
+  const panes = document.querySelectorAll('.section-pane');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+
+  function activateSection(targetId) {
+    navLinks.forEach(l => l.classList.remove('active'));
+    panes.forEach(p => p.classList.remove('active'));
+
+    const targetLink = document.querySelector(`.nav-link-custom[data-target="${targetId}"]`);
+    const targetPane = document.getElementById(targetId);
+
+    if (targetLink) targetLink.classList.add('active');
+    if (targetPane) targetPane.classList.add('active');
+  }
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const targetId = link.getAttribute('data-target');
+      activateSection(targetId);
+
+      if (window.innerWidth <= 991) {
+        sidebar.classList.remove('open');
+      }
+    });
+  });
+
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const section = params.get('section');
+  if (section) {
+    activateSection(section);
+  }
+</script>
+
 </body>
 </html>

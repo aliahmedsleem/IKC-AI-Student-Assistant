@@ -1,0 +1,24 @@
+# Virtual Environments
+.venv/
+venv/
+.venv1/
+
+# Python
+__pycache__/
+*.pyc
+
+# IDEs
+.idea/
+.vscode/
+
+# Environment Files
+.env
+
+# Generated Files
+chroma_faqs/
+models/
+filtered_clusters/
+generated_clusters/
+
+# Database Temporary Files
+*.db-journal
